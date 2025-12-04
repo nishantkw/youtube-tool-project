@@ -2,22 +2,22 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy Maven descriptor
-COPY pom.xml .
+# Copy Maven descriptor from subfolder
+COPY youtubetools/pom.xml pom.xml
 RUN mvn -q dependency:go-offline
 
 # Copy project files
-COPY . .
+COPY youtubetools/ ./youtubetools/
 
 # Build the project (skip tests for speed)
-RUN mvn -q clean package -DskipTests
+RUN mvn -f youtubetools/pom.xml -q clean package -DskipTests
 
 # ---- Run Stage ----
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
 # Copy the built jar from build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/youtubetools/target/*.jar app.jar
 
 EXPOSE 8080
 
